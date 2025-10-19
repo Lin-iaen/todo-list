@@ -1,0 +1,137 @@
+/* 让整个页面居中，设置一个最大宽度 */
+.container {
+    width: 90%;
+    max-width: 500px;
+    margin: 20px auto;
+    font-family: sans-serif;
+}
+
+/* 标题 */
+h1 {
+    text-align: center;
+}
+
+/* 输入区域 */
+.input-area {
+    display: flex; /* 保持一行 */
+    flex-wrap: wrap; /* 在小屏幕上允许换行 */
+    margin-bottom: 20px;
+}
+
+/* 任务输入框 */
+#task-input {
+    flex-grow: 1; /* 占据主要空间 */
+    padding: 10px;
+    font-size: 16px;
+    min-width: 150px; /* 防止被挤压 */
+}
+
+/* (新!) 截止日期输入框 */
+#deadline-input {
+    padding: 8px; /* 调整内边距，使其高度接近 */
+    font-size: 16px;
+    font-family: sans-serif; /* 继承字体 */
+    border: 1px solid #ccc; /* 给个边框 */
+    margin: 0 5px; /* 和旁边留点空隙 */
+}
+
+/* 按钮样式 */
+#add-task-btn {
+    padding: 10px 15px;
+    font-size: 16px;
+    background-color: #007BFF;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+
+#add-task-btn:hover {
+    background-color: #0056b3;
+}
+
+/* 任务列表 */
+#task-list {
+    list-style: none;
+    padding: 0;
+}
+
+/* 列表中的每一项 */
+#task-list li {
+    background: #f4f4f4;
+    padding: 12px;
+    margin-bottom: 5px;
+    font-size: 18px;
+    
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* (新!) 包裹任务文本和日期的容器 */
+.task-content {
+    flex-grow: 1; /* 占据左侧所有空间 */
+}
+
+/* (新!) 日期和星期的样式 */
+.task-content small {
+    display: block; /* 换行显示 */
+    color: #555;     /* 深灰色 */
+    font-size: 14px;
+    margin-top: 4px; /* 和任务拉开一点距离 */
+}
+
+
+/* 删除按钮 (样式不变) */
+.delete-btn {
+    background: #dc3545;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.delete-btn:hover {
+    background: #c82333;
+}
+
+/* 当屏幕宽度小于或等于 600px 时 */
+@media (max-width: 600px) {
+    
+    /* 让容器占满屏幕，加一点内边距 */
+    .container {
+        width: 100%;
+        margin: 0;
+        padding: 10px;
+        /* (重要!) 告诉浏览器把内边距算在宽度内 */
+        box-sizing: border-box; 
+    }
+
+    h1 {
+        font-size: 24px; /* 标题小一点 */
+    }
+
+    /* * 在手机上，输入框、日期、按钮排成一行太挤了
+     * 我们让它们“换行”并各自占满宽度
+     */
+    .input-area {
+        flex-direction: column; /* 垂直排列 */
+        gap: 10px; /* 增加元素之间的间距 */
+    }
+
+    #task-input,
+    #deadline-input,
+    #add-task-btn {
+        width: 100%; /* 全部占满宽度 */
+        margin: 0; /* 去掉之前的左右边距 */
+        box-sizing: border-box; /* 确保 padding 不会撑破 100% */
+    }
+
+    /* 手机上字体大一点，方便点击 */
+    #task-list li {
+        font-size: 16px;
+    }
+    .task-content small {
+        font-size: 14px;
+    }
+}
