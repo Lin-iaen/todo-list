@@ -1,16 +1,17 @@
-// 缓存版本号，如果以后你更新了 css 或 js，修改这个名字（比如 'todo-v2'）
-const CACHE_NAME = 'todo-ddl-v1';
+// 缓存版本号
+const CACHE_NAME = 'todo-ddl-v2'; // v2 是因为我们更新了 app.js
 // (重要!) 列出所有你需要缓存的核心文件
 const urlsToCache = [
-  '/', // '/' 代表网站的根目录，通常是 index.html
+  '/', // '/' 代表网站的根目录
   'index.html',
   'style.css',
   'app.js',
+  'manifest.json', // 也缓存 manifest
   'icons/icon-192.png',
   'icons/icon-512.png'
 ];
 
-// 1. 安装 SW：在 SW "安装"时，打开缓存并存入文件
+// 1. 安装 SW
 self.addEventListener('install', event => {
   event.waitUntil(
     caches.open(CACHE_NAME)
@@ -21,36 +22,49 @@ self.addEventListener('install', event => {
   );
 });
 
-// 2. 激活 SW：(可选) 清理旧缓存
+// 2. 激活 SW：清理旧缓存
 self.addEventListener('activate', event => {
   event.waitUntil(
     caches.keys().then(cacheNames => {
       return Promise.all(
+        // 删除所有不等于 CACHE_NAME 的旧缓存
         cacheNames.filter(name => name !== CACHE_NAME).map(name => caches.delete(name))
       );
     })
   );
 });
 
-// 3. 拦截请求：当网页请求资源时 (网络优先策略)
-// 我们采用“网络优先”策略，这样如果你修改了代码，用户能看到最新版
-// 但如果断网了，它会回退到使用缓存。
+// 3. 拦截请求：优先使用缓存 (Cache First)
+// 这会让你的应用加载非常快，并且能离线运行
 self.addEventListener('fetch', event => {
   event.respondWith(
-    fetch(event.request)
-      .then(networkResponse => {
-        // 如果网络请求成功，我们用它，并且更新缓存
-        // (可选) 你可以检查是否是 http(s) 请求再缓存
-        return caches.open(CACHE_NAME).then(cache => {
-          cache.put(event.request, networkResponse.clone());
-          return networkResponse;
-        });
-      })
-      .catch(() => {
-        // 如果网络请求失败 (断网了)
-        // 我们就去缓存里找
-        console.log('SW: Fetch failed, trying cache...');
-        return caches.match(event.request);
+    caches.match(event.request)
+      .then(response => {
+        // 如果缓存中有匹配的，直接返回缓存的
+        if (response) {
+          return response;
+        }
+        
+        // 如果缓存中没有，才去网络上请求
+        // 并且把请求到的新资源存入缓存
+        return fetch(event.request).then(
+          networkResponse => {
+            // 检查响应是否有效
+            if(!networkResponse || networkResponse.status !== 200 || networkResponse.type !== 'basic') {
+              return networkResponse;
+            }
+            
+            // 复制一份响应，因为响应体只能被读取一次
+            const responseToCache = networkResponse.clone();
+            
+            caches.open(CACHE_NAME)
+              .then(cache => {
+                cache.put(event.request, responseToCache);
+              });
+              
+            return networkResponse;
+          }
+        );
       })
   );
 });
